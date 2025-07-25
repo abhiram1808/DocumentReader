@@ -1,0 +1,191 @@
+/* src/styles/global.css */
+
+/* Import Bootstrap CSS */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Google Font - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Custom Global Styles */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f8f9fa; /* Light gray background, Bootstrap default */
+  color: #212529; /* Dark text, Bootstrap default */
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Custom utility classes or overrides */
+.custom-card {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Bootstrap-like shadow */
+  width: 100%;
+  max-width: 48rem;
+}
+
+.custom-heading {
+  font-size: 2.25rem; /* H1 equivalent */
+  font-weight: 700;
+  color: #343a40;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.custom-section-card {
+  padding: 1rem;
+  border: 1px solid #dee2e6; /* Bootstrap border-color */
+  border-radius: 0.5rem;
+  background-color: #f8f9fa; /* Light background */
+  min-height: 15.625rem;
+}
+
+.custom-button-primary {
+  background-color: #007bff; /* Bootstrap primary blue */
+  border-color: #007bff;
+  color: white;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.custom-button-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+.custom-button-success {
+  background-color: #28a745; /* Bootstrap success green */
+  border-color: #28a745;
+  color: white;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.custom-button-success:hover {
+  background-color: #218838;
+  border-color: #218838;
+}
+.custom-button-info {
+  background-color: #17a2b8; /* Bootstrap info cyan */
+  border-color: #17a2b8;
+  color: white;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.custom-button-info:hover {
+  background-color: #138496;
+  border-color: #138496;
+}
+.custom-button-warning {
+  background-color: #ffc107; /* Bootstrap warning yellow */
+  border-color: #ffc107;
+  color: #212529; /* Dark text for light button */
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.custom-button-warning:hover {
+  background-color: #e0a800;
+  border-color: #e0a800;
+}
+.custom-button-danger {
+  background-color: #dc3545; /* Bootstrap danger red */
+  border-color: #dc3545;
+  color: white;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.custom-button-danger:hover {
+  background-color: #c82333;
+  border-color: #c82333;
+}
+
+.custom-button-disabled {
+  background-color: #6c757d; /* Bootstrap secondary/disabled gray */
+  border-color: #6c757d;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.custom-alert-info {
+  background-color: #d1ecf1; /* Bootstrap info alert bg */
+  border-color: #bee5eb; /* Bootstrap info alert border */
+  color: #0c5460; /* Bootstrap info alert text */
+}
+.custom-alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+.custom-alert-error { /* Using error for red, danger is also available */
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+.custom-alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+}
+
+.custom-spinner {
+  border-top: 4px solid #007bff; /* Bootstrap primary blue */
+  border-bottom: 4px solid #007bff;
+}
+
+.custom-tab-button {
+  border-bottom: 2px solid transparent;
+  color: #6c757d; /* Bootstrap muted text */
+  transition: all 0.2s ease-in-out;
+}
+.custom-tab-button:hover {
+  color: #495057;
+  border-color: #e9ecef;
+}
+.custom-tab-button.active {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.custom-qa-answer-box,
+.custom-summary-box,
+.custom-concepts-box {
+  background-color: #e2eafc; /* A light blue/purple for results */
+  border-left: 4px solid #6610f2; /* A strong purple border */
+  color: #4b0082; /* Darker purple text */
+}
+
+.custom-notes-item {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.custom-notes-delete-btn {
+  color: #dc3545;
+}
+.custom-notes-delete-btn:hover {
+  background-color: #f8d7da;
+}
+
+/* Specific styling for the file input button */
+.custom-file-input::-webkit-file-upload-button {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem; /* Small rounded corners */
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.custom-file-input::-webkit-file-upload-button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
