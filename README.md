@@ -1,140 +1,290 @@
-Project Development Report: AI-Powered Document Study Assistant
+AI-Powered Document Study Assistant
+Empowering Your Learning with Intelligent Document Interaction
+Table of Contents
+Introduction
+
+Features
+
+Technologies Used
+
+Getting Started
+
+Prerequisites
+
+Backend Setup
+
+Frontend Setup
+
+Running the Application
+
+Usage
+
+Project Structure
+
+Future Enhancements
+
+Contributing
+
+License
+
+Contact
+
 1. Introduction
-This report provides a comprehensive overview of the development progress for the AI-Powered Document Study Assistant project. The primary goal of this project is to create an intuitive and intelligent application that allows users to upload PDF documents and interact with their content through various AI-driven features, enhancing study and knowledge extraction.
+The AI-Powered Document Study Assistant is a full-stack web application designed to revolutionize how users interact with their PDF documents for study and knowledge extraction. By integrating cutting-edge AI capabilities, it transforms static PDFs into dynamic, interactive knowledge bases. Users can upload documents and then leverage AI to ask questions, generate summaries, extract key concepts, create flashcards, and manage personalized notes, all within an intuitive and modern interface.
 
-2. Project Overview
-The Document Study Assistant is a web application designed to streamline the process of learning from and interacting with PDF documents. It leverages advanced AI capabilities to provide functionalities such as question-answering, summarization, key concept extraction, and dynamic study tools, all while maintaining a user-friendly interface.
+This project aims to provide a powerful tool for students, researchers, and professionals to efficiently absorb and utilize information from their documents.
 
-3. Key Features Developed
-The following core functionalities have been successfully implemented:
+2. Features
+Smart Document Ingestion: Upload PDF files, and the system intelligently processes them to build a searchable knowledge base.
 
-Document Upload & Knowledge Base Creation:
+Conversational AI (Q&A): Ask natural language questions about your document's content and receive precise, context-aware answers from the AI.
 
-Users can upload PDF files through a dedicated interface.
+Intelligent Summaries: Generate concise, AI-powered summaries of lengthy documents in seconds.
 
-Upon upload, the backend processes the PDF, extracts text, and creates a vector knowledge base (using ChromaDB) for efficient AI querying.
+Key Concept Extraction: Automatically identify and highlight the most critical concepts and keywords from your documents.
 
-Document metadata (filename, upload timestamp) is stored in Firestore.
+Generated Q&A Pairs: Automatically generate relevant question-and-answer pairs from the document for self-testing.
 
-Each uploaded document is assigned a unique ID for management.
+Dynamic Flashcards: Create interactive flashcards from document content to facilitate active recall and effective study.
 
-AI-Powered Q&A:
+Personalized Notes & History: Take and save personal notes associated with each document, and easily manage a history of all your uploaded and analyzed files.
 
-Users can ask natural language questions about the content of the currently active document.
+Integrated PDF Viewer: View the original PDF document directly within the application with page navigation and zoom controls.
 
-The AI (via Gemini API) provides precise, context-aware answers based on the document's knowledge base.
+Persistent Data Storage: All AI-generated outputs and user notes are saved to a cloud database (Firestore) for seamless access across sessions.
 
-Intelligent Summaries:
+Modern UI/UX: Features a sleek dark blue, AI-themed interface with consistent typography, custom imagery, and clear interactive elements.
 
-The application can generate concise, AI-powered summaries of the loaded document's content.
+3. Technologies Used
+Frontend:
 
-Generated summaries are saved to Firestore, allowing for persistence across sessions.
+React.js: A JavaScript library for building user interfaces.
 
-Key Concept Extraction:
+Bootstrap 5: For responsive design and UI components.
 
-AI identifies and extracts the most critical concepts or keywords from the document.
+Animate.css: For subtle UI animations.
 
-Extracted concepts are stored in Firestore.
+react-pdf: For rendering PDF documents in the browser.
 
-Generated Q&A Pairs:
+Vite: A fast build tool for frontend development.
 
-The AI can automatically generate a set of relevant question-and-answer pairs from the document, aiding in self-assessment.
+Backend:
 
-Generated Q&A pairs are saved to Firestore.
+Node.js: JavaScript runtime environment.
 
-Dynamic Flashcards:
+Express.js: Web application framework for Node.js.
 
-Users can generate interactive flashcards based on the document's content, facilitating active recall and study.
+Multer: Middleware for handling multipart/form-data, primarily for file uploads.
 
-Generated flashcards are stored in Firestore.
+dotenv: For managing environment variables.
 
-Personalized Notes:
+fs & path: Node.js built-in modules for file system operations.
 
-A dedicated section allows users to take and save personal notes related to the active document.
+Databases & AI:
 
-Notes are persistently stored in Firestore, associated with the user and document.
+Firestore (Firebase): NoSQL cloud database for storing document metadata, AI-generated outputs (summaries, concepts, Q&A, flashcards), and user notes.
 
-Document History & Management:
+ChromaDB: An open-source vector database used for storing document embeddings, enabling efficient semantic search and retrieval for Q&A.
 
-A sidebar displays a list of all previously uploaded documents, retrieved from Firestore.
+Google Gemini API: Utilized for advanced AI capabilities including text generation for summaries, Q&A, key concepts, and flashcards.
 
-Users can select any document from the history to load its context and previously generated AI outputs.
+4. Getting Started
+Follow these instructions to set up and run the project locally.
 
-The currently active document is clearly indicated in the UI.
+Prerequisites
+Node.js (v18 or higher recommended)
 
-Integrated PDF Viewer (NEW):
+npm (Node Package Manager)
 
-A new "Read Document" tab has been added to the main application.
+Git
 
-This tab fetches and displays the actual PDF file content directly within the browser using react-pdf.
+A Google Cloud Project with the Gemini API enabled.
 
-Includes basic navigation (previous/next page) and zoom controls.
+A Firebase Project with Firestore enabled.
 
-4. UI/UX Enhancements
-Significant effort has been placed on creating a visually appealing and user-friendly interface:
+Ensure your Firestore security rules allow authenticated reads/writes (e.g., allow read, write: if request.auth != null; for public data and allow read, write: if request.auth != null && request.auth.uid == userId; for user-specific data).
 
-Dark Blue AI-Themed Aesthetic: The application features a consistent dark blue and charcoal color palette, complemented by electric cyan and subtle purple accents, to evoke a modern, high-tech "AI sense."
+A config.js file in document-qa-backend/config/ with your Firebase and Gemini API keys.
 
-Consistent Typography: Orbitron has been applied for prominent headings (e.g., hero title, section titles) to convey a futuristic feel, while Rajdhani is used for body text, ensuring readability across the application.
+Backend Setup
+Navigate to the backend directory:
 
-Custom AI-Themed Imagery:
+cd document-qa-backend
 
-Hero & CTA Backgrounds: Custom AI-generated images featuring neural networks and circuit board patterns are used as backgrounds for the landing page's hero and call-to-action sections, creating a strong visual identity. CSS background-image and pseudo-elements ensure proper containment and text readability.
+Install dependencies:
 
-Feature Card Icons: Unique AI-themed images (e.g., stylized document processing, Q&A bubbles, concept extraction visuals) are integrated into each feature card, providing clear visual cues for functionality.
+npm install
 
-Button Styling: Buttons across the landing page and main application have been styled with a white background and dark text, offering excellent contrast and a clean, actionable appearance.
+Create .env file:
+Create a file named .env in the document-qa-backend directory and add your environment variables.
 
-Enhanced Focus States: Interactive elements like input fields and buttons now have clear, glowing blue focus outlines, improving accessibility and user feedback.
+PORT=5000
+GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_API_KEY
+# Add your Firebase config here as a JSON string or individual variables if needed by backend
+# Example (if backend needs it, otherwise frontend handles it):
+# FIREBASE_API_KEY=your_firebase_api_key
+# ... other firebase config ...
 
-Clear Active Document Indication: The currently loaded document in the sidebar's history is visually highlighted, making it easy for users to track their context.
+Create config/config.js:
+Create a config folder inside document-qa-backend, and then create a config.js file inside document-qa-backend/config/. This file will hold your Firebase configuration object.
 
-Differentiated Landing Page Button Navigation: The top "Get Started with AI" button now navigates to the Q&A tab, while the bottom "Experience AI Power Now" button leads directly to the "Upload Document" tab, optimizing the user's entry point based on their engagement level.
+// document-qa-backend/config/config.js
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+  projectId: "YOUR_FIREBASE_PROJECT_ID",
+  storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+  appId: "YOUR_FIREBASE_APP_ID"
+};
 
-5. Technical Architecture & Stack
-The project utilizes a modern full-stack architecture:
+module.exports = { firebaseConfig };
 
-Frontend: React.js (Vite), Bootstrap 5, Animate.css, react-pdf
+Note: The __firebase_config and __app_id global variables are typically provided by the Canvas environment. If running outside Canvas, you'd need to manage Firebase initialization and authentication (e.g., anonymous sign-in) directly in your frontend and potentially pass appId explicitly.
 
-Backend: Node.js, Express.js, Multer (for file uploads)
+Create uploads and chroma_db directories:
+These directories are needed for file storage and the ChromaDB vector store.
 
-Database/Vector Store:
+mkdir uploads
+mkdir chroma_db
 
-Firestore: For persistent storage of document metadata, AI-generated outputs (summaries, concepts, Q&A, flashcards), and user notes.
+Frontend Setup
+Navigate to the frontend directory:
 
-ChromaDB: As the vector database for storing document embeddings, enabling semantic search and Q&A.
+cd document-qa-frontend
+
+Install dependencies:
+
+npm install
+
+Running the Application
+You need to run both the backend and frontend servers simultaneously in separate terminal windows.
+
+Start the Backend Server:
+Open a new terminal window and navigate to the document-qa-backend directory.
 
-AI Model: Gemini API (via backend integration) for generating summaries, Q&A, key concepts, and flashcards.
+cd F:\DocumentReader\document-qa-backend
+npm run dev
 
-6. Challenges Overcome
-Throughout the development, several key challenges were addressed:
+The backend server should start on http://localhost:5000.
 
-Image Display & Containment: Initial issues with background images and feature card images overflowing their containers were resolved through iterative CSS refinements, including the strategic use of object-fit, background-size, position: absolute, overflow: hidden, and !important declarations. The transition to CSS background-image for hero/CTA sections proved more robust.
+Start the Frontend Development Server:
+Open another new terminal window and navigate to the document-qa-frontend directory.
 
-Backend Routing & File Serving: Correctly identifying the backend's main route file (src/routes/documentRoutes.js) was crucial for integrating the new PDF serving endpoint. Ensuring the path and fs modules were correctly used for file access and streaming was also key.
+cd F:\DocumentReader\document-qa-frontend
+npm run dev
 
-Firebase Integration & Persistence: Successfully integrated Firebase Firestore for user authentication (anonymous/custom token) and persistent storage of user-specific document data and notes. This replaced earlier considerations of local storage for a more scalable solution.
+The frontend application should open in your browser, typically at http://localhost:5173 (or a similar port).
 
-Frontend-Backend Communication: Established robust API calls between the React frontend and Node.js backend for document upload, AI processing requests, and now, PDF file retrieval.
+5. Usage
+Once the application is running:
 
-PDF Viewer Integration: Successfully integrated react-pdf to display PDF content directly in the browser, including handling worker setup, page navigation, and zoom.
+Landing Page: You will first see a landing page.
 
-7. Future Enhancements (Roadmap)
-Building on the current foundation, here are some potential future enhancements:
+Click "Get Started with AI" to go to the main application's Q&A tab.
 
-Document Management Features: Implement options to rename and delete documents from the DocumentHistory (including removing their associated vector store from ChromaDB).
+Click "Experience AI Power Now" to go directly to the "Upload Document" tab.
 
-"Copy to Clipboard" Functionality: Add small buttons next to AI-generated outputs (summary, answers, concepts) to easily copy them to the clipboard.
+Upload Document: In the "Upload Document" tab, select a PDF file and click "Upload." The system will process it and create a knowledge base.
 
-User Feedback/Rating: Introduce a simple mechanism (e.g., thumbs up/down) for users to rate the quality of AI-generated responses.
+Document History: Your uploaded documents will appear in the left sidebar. Click on any document to make it the "Currently Active Document."
 
-Mobile Responsiveness Refinement: Implement a collapsible sidebar for DocumentHistory on smaller screens to optimize vertical space.
+Interact with AI:
 
-Enhanced PDF Viewer: Add features like text search within the PDF viewer, annotation tools, or direct selection of text for Q&A.
+Q&A Tab: Type a question in the input field and click "Ask Question" to get an AI-generated answer.
 
-Advanced AI Features: Explore capabilities like multi-document Q&A, comparing documents, or generating different types of study materials.
+Summary Tab: Click "Get Summary" to generate a concise summary of the active document.
 
-User Authentication: Implement more robust user authentication (e.g., email/password, Google Sign-in) if user accounts with shared data become a requirement.
+Key Concepts Tab: Click "Get Key Concepts" to extract important terms.
 
-8. Conclusion
-The AI-Powered Document Study Assistant has made significant strides in development, establishing a strong functional core and a polished, modern user interface. The integration of AI features, persistent data storage, and the new PDF viewer creates a compelling tool for document interaction and learning. The project is now in a robust state, ready for further expansion and refinement based on user feedback and evolving requirements.
+Generated Q&A Tab: Click "Generate Q&A Pairs" to get automatically created question-answer sets.
+
+Flashcards Tab: Click "Generate Flashcards" to create interactive study cards.
+
+Notes Tab: Add and save your personal notes for the active document.
+
+Read Document Tab: View the original PDF content directly in the browser.
+
+6. Project Structure
+DocumentReader/
+├── document-qa-backend/
+│   ├── config/
+│   │   └── config.js              # Firebase configuration
+│   ├── controllers/
+│   │   └── documentController.js  # Logic for document processing and AI interactions
+│   ├── node_modules/              # Backend dependencies
+│   ├── routes/
+│   │   └── documentRoutes.js      # API routes for documents
+│   ├── uploads/                   # Directory to store uploaded PDF files (ignored by Git)
+│   ├── chroma_db/                 # Directory for ChromaDB vector store (ignored by Git)
+│   ├── .env                       # Environment variables (ignored by Git)
+│   ├── package.json
+│   ├── server.js                  # Backend entry point
+│   └── ...
+├── document-qa-frontend/
+│   ├── public/
+│   │   ├── images/                # Your custom AI-themed images
+│   │   └── ...
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── documentApi.js     # Frontend API calls to backend
+│   │   ├── components/
+│   │   │   ├── DocumentHistory.jsx
+│   │   │   ├── DocumentUpload.jsx
+│   │   │   ├── FlashcardsSection.jsx
+│   │   │   ├── GeneratedQaSection.jsx
+│   │   │   ├── KeyConceptsSection.jsx
+│   │   │   ├── MessageDisplay.jsx
+│   │   │   ├── NotesSection.jsx
+│   │   │   ├── PdfViewerSection.jsx # New PDF viewer component
+│   │   │   ├── QaSection.jsx
+│   │   │   ├── SummarySection.jsx
+│   │   │   └── TabNavigation.jsx
+│   │   ├── hooks/
+│   │   │   └── useFirebaseNotes.js # Custom hook for Firebase/Firestore
+│   │   ├── pages/
+│   │   │   ├── HomePage.jsx       # Main application interface
+│   │   │   └── LandingPage.jsx    # Initial landing page
+│   │   ├── App.jsx                # Root React component
+│   │   ├── index.css              # Global CSS styles
+│   │   └── main.jsx               # React entry point
+│   ├── node_modules/              # Frontend dependencies
+│   ├── .gitignore
+│   ├── package.json
+│   ├── vite.config.js
+│   └── ...
+└── .gitignore                     # Global .gitignore for the monorepo
+
+7. Future Enhancements
+Document Management: Implement features to rename, delete, and download documents from history.
+
+User Authentication: Introduce robust user accounts (e.g., email/password, social logins) for personalized experiences.
+
+Enhanced PDF Viewer: Add text search, annotation tools, and improved navigation within the PDF viewer.
+
+Advanced AI Features: Explore multi-document Q&A, document comparison, or more complex content generation.
+
+Mobile Responsiveness: Further optimize layout and navigation for smaller screens (e.g., collapsible sidebar).
+
+"Copy to Clipboard" Functionality: Add quick copy buttons for AI-generated text.
+
+8. Contributing
+Contributions are welcome! If you have suggestions, bug reports, or want to contribute code, please feel free to:
+
+Fork the repository.
+
+Create a new branch (git checkout -b feature/your-feature).
+
+Make your changes.
+
+Commit your changes (git commit -m 'Add new feature').
+
+Push to the branch (git push origin feature/your-feature).
+
+Open a Pull Request.
+
+9. License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+10. Contact
+If you have any questions or feedback, feel free to reach out.
