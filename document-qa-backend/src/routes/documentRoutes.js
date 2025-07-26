@@ -21,4 +21,7 @@ router.post('/key-concepts', documentController.getKeyConcepts);
 // Route for generating Q&A pairs from the document.
 router.post('/generate-qa', documentController.generateQA);
 
+// NEW: Route for generating flashcard-style Q&A pairs from the document.
+router.post('/flashcards', documentController.getFlashcards); // <-- NEW ROUTE
+
 module.exports = router;

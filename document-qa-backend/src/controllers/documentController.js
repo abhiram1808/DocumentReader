@@ -102,10 +102,26 @@ const generateQA = async (req, res) => {
   }
 };
 
+/**
+ * Handles generating flashcard-style Q&A pairs from the loaded document.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ */
+const getFlashcards = async (req, res) => { // <-- NEW FUNCTION
+  try {
+    const flashcards = await llmService.generateFlashcards();
+    res.status(200).json({ flashcards });
+  } catch (error) {
+    console.error('Error in getFlashcards controller:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate flashcards.' });
+  }
+};
+
 module.exports = {
   uploadDocument,
   askQuestion,
   getSummary,
   getKeyConcepts,
   generateQA,
+  getFlashcards, // <-- EXPORT NEW FUNCTION
 };

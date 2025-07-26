@@ -8,7 +8,8 @@ import QaSection from '../components/QaSection';
 import SummarySection from '../components/SummarySection';
 import KeyConceptsSection from '../components/KeyConceptsSection';
 import GeneratedQaSection from '../components/GeneratedQaSection';
-import NotesSection from '../components/NotesSection'; // Notes section is self-contained with its hook
+import NotesSection from '../components/NotesSection';
+import FlashcardsSection from '../components/FlashcardsSection'; // <-- Import FlashcardsSection
 
 const HomePage = () => {
   // --- UI and Data State ---
@@ -18,16 +19,18 @@ const HomePage = () => {
   const [summary, setSummary] = useState('');
   const [keyConcepts, setKeyConcepts] = useState([]);
   const [generatedQA, setGeneratedQA] = useState([]);
+  const [flashcards, setFlashcards] = useState([]); // <-- New state for flashcards
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('info'); // 'info', 'success', 'error', 'warning'
-  const [activeTab, setActiveTab] = useState('qa'); // 'qa', 'summary', 'concepts', 'generated_qa', 'notes'
+  const [activeTab, setActiveTab] = useState('qa'); // 'qa', 'summary', 'concepts', 'generated_qa', 'notes', 'flashcards'
 
   const tabs = [
     { id: 'qa', name: 'Q&A' },
     { id: 'summary', name: 'Summary' },
     { id: 'concepts', name: 'Key Concepts' },
     { id: 'generated_qa', name: 'Generated Q&A' },
+    { id: 'flashcards', name: 'Flashcards' }, // <-- New tab for Flashcards
     { id: 'notes', name: 'Notes' },
   ];
 
@@ -59,6 +62,7 @@ const HomePage = () => {
     setSummary('');
     setKeyConcepts([]);
     setGeneratedQA([]);
+    setFlashcards([]); // <-- Clear flashcards on new document upload
 
     try {
       const data = await DocumentApi.uploadDocument(selectedFile);
@@ -111,7 +115,7 @@ const HomePage = () => {
     }
   };
 
-  // --- Handlers for New Features (Summary, Key Concepts, Generated Q&A) ---
+  // --- Handlers for New Features (Summary, Key Concepts, Generated Q&A, Flashcards) ---
   const handleGetSummary = async () => {
     setLoading(true);
     setMessage('Generating summary...');
@@ -190,6 +194,33 @@ const HomePage = () => {
     }
   };
 
+  // <-- New handler for Flashcards
+  const handleGenerateFlashcards = async () => {
+    setLoading(true); // Use the global loading state
+    setMessage('Generating flashcards...');
+    setMessageType('info');
+    setFlashcards([]); // Clear previous flashcards
+
+    try {
+      const data = await DocumentApi.generateFlashcards();
+      if (data.flashcards) {
+        setFlashcards(data.flashcards);
+        setMessage('Flashcards generated successfully.');
+        setMessageType('success');
+      } else if (data.error) {
+        setFlashcards([]);
+        setMessage(`Error: ${data.error}`);
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Flashcard generation failed:', error);
+      setMessage('Failed to connect to the server or generate flashcards.');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100 py-4">
       <div className="custom-card">
@@ -202,6 +233,7 @@ const HomePage = () => {
           selectedFile={selectedFile}
         />
 
+        {/* TabNavigation component will receive the updated tabs array */}
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} tabs={tabs} />
 
         <div className="custom-section-card mb-4">
@@ -235,8 +267,16 @@ const HomePage = () => {
               loading={loading}
             />
           )}
+          {activeTab === 'flashcards' && ( // <-- Render FlashcardsSection
+            <FlashcardsSection
+              flashcards={flashcards}
+              loading={loading} // Use global loading state
+              error={messageType === 'error' && message.includes('flashcards') ? message : ''} // Pass specific error
+              onGenerateFlashcards={handleGenerateFlashcards}
+            />
+          )}
           {activeTab === 'notes' && (
-            <NotesSection /> 
+            <NotesSection />
           )}
         </div>
 

@@ -10,15 +10,15 @@ const { Document } = require('@langchain/core/documents'); // Import Document cl
 
 // Initialize Google Gemini LLM (ensure GOOGLE_API_KEY is in .env)
 const model = new ChatGoogleGenerativeAI({
-  model: 'gemini-1.5-flash', // <--- CHANGED MODEL HERE
-  apiKey: process.env.GOOGLE_API_KEY, // Ensure this is correctly loaded from .env
-  temperature: 0.2, // Lower temperature for more focused responses
-  maxOutputTokens: 2048, // Increased output tokens for potentially longer summaries/answers
+  model: 'gemini-1.5-flash',
+  apiKey: process.env.GOOGLE_API_KEY,
+  temperature: 0.2,
+  maxOutputTokens: 2048,
 });
 
 // Initialize Google Gemini Embeddings
 const embeddings = new GoogleGenerativeAIEmbeddings({
-  model: 'embedding-001', // Or another suitable embedding model
+  model: 'embedding-001',
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
@@ -45,7 +45,7 @@ const processPdfDocument = async (filePath) => {
   console.log(`Split into ${splitDocs.length} chunks.`);
 
   console.log('Creating/Updating vector store...');
-  await documentModel.createAndPersistVectorStore(splitDocs, null, embeddings); // Pass embeddings here
+  await documentModel.createAndPersistVectorStore(splitDocs, null, embeddings);
   console.log('Vector store created/updated successfully.');
 };
 
@@ -56,13 +56,12 @@ const processPdfDocument = async (filePath) => {
  */
 const getAnswerFromDocument = async (question) => {
   console.log(`Getting answer for question: "${question}"`);
-  const vectorStore = await documentModel.getVectorStore(embeddings); // Still need embeddings for query embedding
+  const vectorStore = await documentModel.getVectorStore(embeddings);
 
   if (!vectorStore) {
     throw new Error('No document knowledge base found. Please upload a document first.');
   }
 
-  // Create a RetrievalQAChain to combine LLM with vector store retriever
   const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
 
   const response = await chain.call({ query: question });
@@ -81,7 +80,6 @@ const getDocumentSummary = async () => {
     throw new Error('No document chunks available for summarization. Please upload a document first.');
   }
 
-  // Concatenate all page content for summarization
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
 
   const summaryPrompt = PromptTemplate.fromTemplate(
@@ -126,10 +124,11 @@ const getKeyConcepts = async () => {
 
 /**
  * Generates important Q&A pairs from the loaded document.
+ * These are more like general discussion questions.
  * @returns {Promise<Array<{question: string, answer: string}>>} An array of Q&A objects.
  */
 const generateImportantQA = async () => {
-  console.log('Generating important Q&A pairs...');
+  console.log('Generating important Q&A pairs for general understanding...');
   const allChunks = documentModel.getAllDocumentChunks();
 
   if (allChunks.length === 0) {
@@ -139,7 +138,7 @@ const generateImportantQA = async () => {
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
 
   const qaPrompt = PromptTemplate.fromTemplate(
-    `Based on the following document, generate 3-5 important question-answer pairs that would be useful for studying this document. Format each pair as "Q: [Question]\nA: [Answer]".
+    `Based on the following document, generate 3-5 important question-answer pairs that would be useful for a general understanding or discussion of this document. Format each pair as "Q: [Question]\nA: [Answer]".
     
     Document:
     {document}
@@ -166,6 +165,89 @@ const generateImportantQA = async () => {
   return qaPairs;
 };
 
+/**
+ * Generates flashcard-style Q&A pairs from the loaded document.
+ * These are concise and suitable for memorization.
+ * @returns {Promise<Array<{question: string, answer: string}>>} An array of flashcard objects.
+ */
+const generateFlashcards = async () => {
+  console.log('Generating flashcard Q&A pairs...');
+  const allChunks = documentModel.getAllDocumentChunks();
+
+  if (allChunks.length === 0) {
+    throw new Error('No document chunks available for flashcard generation. Please upload a document first.');
+  }
+
+  const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
+
+  // --- FIX: Escape curly braces in the example JSON using double braces {{ and }} ---
+  const flashcardPrompt = PromptTemplate.fromTemplate(
+    `From the following document, generate 5-10 concise question-answer pairs that are ideal for flashcards. Focus on key facts, definitions, and important details.
+    Format each pair strictly as a JSON array of objects, where each object has "question" and "answer" properties.
+    Example: [{{ "question": "What is X?", "answer": "Y." }}, {{ "question": "Define Z.", "answer": "Z is..." }}]
+    
+    Document:
+    {document}
+    
+    Flashcards (JSON array):`
+  );
+
+  // Use Structured Response generation
+  const payload = {
+    contents: [{
+      role: "user",
+      parts: [{ text: await flashcardPrompt.format({ document: fullDocumentText }) }]
+    }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "ARRAY",
+        items: {
+          type: "OBJECT",
+          properties: {
+            "question": { "type": "STRING" },
+            "answer": { "type": "STRING" }
+          },
+          "propertyOrdering": ["question", "answer"]
+        }
+      }
+    }
+  };
+
+  const apiKey = process.env.GOOGLE_API_KEY;
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json();
+
+  if (result.candidates && result.candidates.length > 0 &&
+      result.candidates[0].content && result.candidates[0].content.parts &&
+      result.candidates[0].content.parts.length > 0) {
+    const jsonString = result.candidates[0].content.parts[0].text;
+    try {
+      const parsedFlashcards = JSON.parse(jsonString);
+      if (Array.isArray(parsedFlashcards) && parsedFlashcards.every(item => typeof item.question === 'string' && typeof item.answer === 'string')) {
+        return parsedFlashcards;
+      } else {
+        console.warn("LLM generated unexpected flashcard format:", jsonString);
+        return [];
+      }
+    } catch (parseError) {
+      console.error("Failed to parse flashcards JSON:", parseError);
+      console.error("Raw LLM response:", jsonString);
+      return [];
+    }
+  } else {
+    console.warn("LLM did not return valid flashcard content.");
+    return [];
+  }
+};
+
 
 module.exports = {
   processPdfDocument,
@@ -173,4 +255,5 @@ module.exports = {
   getDocumentSummary,
   getKeyConcepts,
   generateImportantQA,
+  generateFlashcards,
 };
