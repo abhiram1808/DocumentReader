@@ -2,13 +2,15 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 
 /**
- * Uploads a PDF document to the backend for processing.
+ * Uploads a PDF document to the backend for processing, associated with a specific document ID.
  * @param {File} file - The PDF file to upload.
+ * @param {string} documentId - The unique ID for this document (from Firestore).
  * @returns {Promise<object>} - The response data from the backend.
  */
-export const uploadDocument = async (file) => {
+export const uploadDocument = async (file, documentId) => { // <-- documentId added
   const formData = new FormData();
   formData.append('document', file);
+  formData.append('documentId', documentId); // <-- Append documentId
 
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: 'POST',
@@ -18,6 +20,28 @@ export const uploadDocument = async (file) => {
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to upload document.');
+  }
+
+  return response.json();
+};
+
+/**
+ * Tells the backend to load a specific document's context (HNSWLib index and raw chunks) into memory.
+ * @param {string} documentId - The unique ID of the document to load.
+ * @returns {Promise<object>} - The response data from the backend.
+ */
+export const loadDocumentContext = async (documentId) => { // <-- NEW FUNCTION
+  const response = await fetch(`${API_BASE_URL}/load-context`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ documentId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || `Failed to load context for document ${documentId}.`);
   }
 
   return response.json();
@@ -51,11 +75,10 @@ export const askQuestion = async (question) => {
  */
 export const getSummary = async () => {
   const response = await fetch(`${API_BASE_URL}/summary`, {
-    method: 'POST', // Use POST as defined in backend routes
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    // No body needed for summary request
   });
 
   if (!response.ok) {
@@ -110,7 +133,7 @@ export const generateQA = async () => {
  * Requests flashcard-style Q&A pairs from the uploaded document from the backend.
  * @returns {Promise<object>} - The response data containing the flashcards.
  */
-export const generateFlashcards = async () => { // <-- NEW FUNCTION
+export const generateFlashcards = async () => {
   const response = await fetch(`${API_BASE_URL}/flashcards`, {
     method: 'POST',
     headers: {

@@ -23,10 +23,11 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
 });
 
 /**
- * Processes a PDF document: loads, splits, embeds, and stores in vector DB.
+ * Processes a PDF document: loads, splits, embeds, and stores in vector DB for a specific document ID.
+ * @param {string} documentId - The unique ID for this document.
  * @param {string} filePath - Path to the PDF file.
  */
-const processPdfDocument = async (filePath) => {
+const processPdfDocument = async (documentId, filePath) => { // <-- documentId added
   console.log('Loading PDF...');
   const loader = new PDFLoader(filePath);
   const docs = await loader.load();
@@ -44,9 +45,20 @@ const processPdfDocument = async (filePath) => {
   const splitDocs = await textSplitter.splitDocuments(docs);
   console.log(`Split into ${splitDocs.length} chunks.`);
 
-  console.log('Creating/Updating vector store...');
-  await documentModel.createAndPersistVectorStore(splitDocs, null, embeddings);
+  console.log(`Creating/Updating vector store for document ID: ${documentId}...`);
+  // Pass documentId to documentModel.createAndPersistVectorStore
+  await documentModel.createAndPersistVectorStore(documentId, splitDocs, embeddings);
   console.log('Vector store created/updated successfully.');
+};
+
+/**
+ * Loads a specific document's context (vector store and raw chunks) into backend memory.
+ * @param {string} documentId - The unique ID of the document to load.
+ */
+const loadDocumentContext = async (documentId) => { // <-- NEW FUNCTION
+  console.log(`Loading document context for ID: ${documentId}...`);
+  await documentModel.loadSpecificVectorStore(documentId, embeddings);
+  console.log(`Document context for ID: ${documentId} loaded successfully.`);
 };
 
 /**
@@ -56,10 +68,10 @@ const processPdfDocument = async (filePath) => {
  */
 const getAnswerFromDocument = async (question) => {
   console.log(`Getting answer for question: "${question}"`);
-  const vectorStore = await documentModel.getVectorStore(embeddings);
+  const vectorStore = await documentModel.getVectorStore(embeddings); // This now gets the currently loaded store
 
   if (!vectorStore) {
-    throw new Error('No document knowledge base found. Please upload a document first.');
+    throw new Error('No document knowledge base loaded. Please upload or load a document first.');
   }
 
   const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
@@ -74,10 +86,10 @@ const getAnswerFromDocument = async (question) => {
  */
 const getDocumentSummary = async () => {
   console.log('Generating document summary...');
-  const allChunks = documentModel.getAllDocumentChunks();
+  const allChunks = documentModel.getAllDocumentChunks(); // Gets chunks of currently loaded document
 
   if (allChunks.length === 0) {
-    throw new Error('No document chunks available for summarization. Please upload a document first.');
+    throw new Error('No document chunks available for summarization. Please upload or load a document first.');
   }
 
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
@@ -101,10 +113,10 @@ const getDocumentSummary = async () => {
  */
 const getKeyConcepts = async () => {
   console.log('Extracting key concepts...');
-  const allChunks = documentModel.getAllDocumentChunks();
+  const allChunks = documentModel.getAllDocumentChunks(); // Gets chunks of currently loaded document
 
   if (allChunks.length === 0) {
-    throw new Error('No document chunks available for key concept extraction. Please upload a document first.');
+    throw new Error('No document chunks available for key concept extraction. Please upload or load a document first.');
   }
 
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
@@ -129,10 +141,10 @@ const getKeyConcepts = async () => {
  */
 const generateImportantQA = async () => {
   console.log('Generating important Q&A pairs for general understanding...');
-  const allChunks = documentModel.getAllDocumentChunks();
+  const allChunks = documentModel.getAllDocumentChunks(); // Gets chunks of currently loaded document
 
   if (allChunks.length === 0) {
-    throw new Error('No document chunks available for Q&A generation. Please upload a document first.');
+    throw new Error('No document chunks available for Q&A generation. Please upload or load a document first.');
   }
 
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
@@ -172,15 +184,14 @@ const generateImportantQA = async () => {
  */
 const generateFlashcards = async () => {
   console.log('Generating flashcard Q&A pairs...');
-  const allChunks = documentModel.getAllDocumentChunks();
+  const allChunks = documentModel.getAllDocumentChunks(); // Gets chunks of currently loaded document
 
   if (allChunks.length === 0) {
-    throw new Error('No document chunks available for flashcard generation. Please upload a document first.');
+    throw new Error('No document chunks available for flashcard generation. Please upload or load a document first.');
   }
 
   const fullDocumentText = allChunks.map(doc => doc.pageContent).join('\n\n');
 
-  // --- FIX: Escape curly braces in the example JSON using double braces {{ and }} ---
   const flashcardPrompt = PromptTemplate.fromTemplate(
     `From the following document, generate 5-10 concise question-answer pairs that are ideal for flashcards. Focus on key facts, definitions, and important details.
     Format each pair strictly as a JSON array of objects, where each object has "question" and "answer" properties.
@@ -192,7 +203,6 @@ const generateFlashcards = async () => {
     Flashcards (JSON array):`
   );
 
-  // Use Structured Response generation
   const payload = {
     contents: [{
       role: "user",
@@ -251,6 +261,7 @@ const generateFlashcards = async () => {
 
 module.exports = {
   processPdfDocument,
+  loadDocumentContext, // Export the new function
   getAnswerFromDocument,
   getDocumentSummary,
   getKeyConcepts,

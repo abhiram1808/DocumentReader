@@ -8,11 +8,25 @@ import {
 } from 'firebase/firestore';
 
 // Define global variables for Firebase configuration if they exist, otherwise use defaults
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+const canvasAppId = typeof __app_id !== 'undefined' ? __app_id : null;
+const canvasFirebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+const canvasInitialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// Custom hook for Firebase Notes management
+// Determine Firebase config and app ID based on environment
+const effectiveFirebaseConfig = canvasFirebaseConfig || {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
+
+const currentAppId = canvasAppId || effectiveFirebaseConfig.projectId || 'document-reader-local';
+const initialAuthToken = canvasInitialAuthToken;
+
+// Custom hook for Firebase Notes management AND exposing core Firebase instances
 const useFirebaseNotes = () => {
   const [db, setDb] = useState(null);
   const [auth, setAuth] = useState(null);
@@ -25,10 +39,14 @@ const useFirebaseNotes = () => {
   // --- Firebase Initialization and Authentication ---
   useEffect(() => {
     let unsubscribeAuth = () => {};
-    let unsubscribeNotes = () => {};
 
     try {
-      const app = initializeApp(firebaseConfig);
+      // Robust check for essential Firebase config fields
+      if (!effectiveFirebaseConfig.apiKey || !effectiveFirebaseConfig.authDomain || !effectiveFirebaseConfig.projectId) {
+        throw new Error("Firebase config is incomplete. Ensure apiKey, authDomain, and projectId are provided in .env.local or by Canvas.");
+      }
+
+      const app = initializeApp(effectiveFirebaseConfig);
       const firestore = getFirestore(app);
       const firebaseAuth = getAuth(app);
 
@@ -38,18 +56,18 @@ const useFirebaseNotes = () => {
       unsubscribeAuth = onAuthStateChanged(firebaseAuth, async (user) => {
         if (user) {
           setUserId(user.uid);
-          console.log('User authenticated:', user.uid);
+          console.log('useFirebaseNotes: User authenticated:', user.uid);
         } else {
           try {
             if (initialAuthToken) {
               await signInWithCustomToken(firebaseAuth, initialAuthToken);
-              console.log('Signed in with custom token.');
+              console.log('useFirebaseNotes: Signed in with custom token.');
             } else {
               await signInAnonymously(firebaseAuth);
-              console.log('Signed in anonymously.');
+              console.log('useFirebaseNotes: Signed in anonymously.');
             }
           } catch (error) {
-            console.error('Firebase authentication failed:', error);
+            console.error('useFirebaseNotes: Firebase authentication failed:', error);
             setNotesError('Error signing into Firebase. Notes functionality may be limited.');
           }
         }
@@ -59,15 +77,14 @@ const useFirebaseNotes = () => {
 
       return () => {
         unsubscribeAuth();
-        unsubscribeNotes(); // Ensure notes listener is also cleaned up
       };
     } catch (error) {
-      console.error("Failed to initialize Firebase:", error);
+      console.error("useFirebaseNotes: Failed to initialize Firebase:", error);
       setNotesError("Failed to initialize Firebase. Notes functionality will not work.");
       setIsAuthReady(true);
       setNotesLoading(false);
     }
-  }, []); // Run only once on component mount
+  }, [effectiveFirebaseConfig, initialAuthToken]); // Dependencies for re-running effect
 
   // --- Firestore Notes Listener ---
   useEffect(() => {
@@ -76,8 +93,7 @@ const useFirebaseNotes = () => {
       setNotesLoading(true);
       setNotesError(null);
       try {
-        const notesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/notes`);
-        // Order notes by timestamp in descending order (latest first)
+        const notesCollectionRef = collection(db, `artifacts/${currentAppId}/users/${userId}/notes`);
         const q = query(notesCollectionRef, orderBy('timestamp', 'desc'));
 
         unsubscribeNotes = onSnapshot(q, (snapshot) => {
@@ -87,25 +103,23 @@ const useFirebaseNotes = () => {
           }));
           setNotes(fetchedNotes);
           setNotesLoading(false);
-          console.log('Notes updated from Firestore.');
+          console.log('useFirebaseNotes: Notes updated from Firestore.');
         }, (error) => {
-          console.error('Error fetching notes from Firestore:', error);
+          console.error('useFirebaseNotes: Error fetching notes from Firestore:', error);
           setNotesError('Error loading notes.');
           setNotesLoading(false);
         });
       } catch (error) {
-        console.error('Error setting up notes snapshot listener:', error);
+        console.error('useFirebaseNotes: Error setting up notes snapshot listener:', error);
         setNotesError('Error setting up notes listener.');
         setNotesLoading(false);
       }
     } else if (isAuthReady && !userId) {
-        // If auth is ready but no user ID (e.g., anonymous sign-in failed),
-        // notes won't load, but we should stop loading state.
-        setNotesLoading(false);
-        setNotesError('Not authenticated to load notes.');
+      setNotesLoading(false);
+      setNotesError('Not authenticated to load notes.');
     }
     return () => unsubscribeNotes(); // Cleanup notes listener
-  }, [db, userId, isAuthReady]); // Re-run if db, userId, or isAuthReady changes
+  }, [db, userId, isAuthReady, currentAppId]); // Re-run if db, userId, isAuthReady, or appId changes
 
   /**
    * Adds a new note to Firestore.
@@ -118,13 +132,13 @@ const useFirebaseNotes = () => {
       return false;
     }
     try {
-      await addDoc(collection(db, `artifacts/${appId}/users/${userId}/notes`), {
+      await addDoc(collection(db, `artifacts/${currentAppId}/users/${userId}/notes`), {
         content: content,
         timestamp: serverTimestamp(), // Use server timestamp for consistency
       });
       return true;
     } catch (error) {
-      console.error('Error adding note:', error);
+      console.error('useFirebaseNotes: Error adding note:', error);
       setNotesError('Failed to add note.');
       return false;
     }
@@ -141,23 +155,29 @@ const useFirebaseNotes = () => {
       return false;
     }
     try {
-      await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/notes`, noteId));
+      await deleteDoc(doc(db, `artifacts/${currentAppId}/users/${userId}/notes`, noteId));
       return true;
     } catch (error) {
-      console.error('Error deleting note:', error);
+      console.error('useFirebaseNotes: Error deleting note:', error);
       setNotesError('Failed to delete note.');
       return false;
     }
   };
 
   return {
-    notes,
+    // Core Firebase instances and auth state
+    db,
+    auth,
     userId,
+    isAuthReady,
+    currentAppId, // Also export currentAppId for consistency
+
+    // Notes-specific state and functions
+    notes,
     notesLoading,
     notesError,
     addNote,
     deleteNote,
-    isAuthReady // Expose isAuthReady for components to disable UI elements
   };
 };
 

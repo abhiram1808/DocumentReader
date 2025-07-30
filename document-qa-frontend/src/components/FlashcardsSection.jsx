@@ -1,6 +1,55 @@
 import React, { useState, useEffect } from 'react';
 
-const FlashcardsSection = ({ flashcards, loading, error, onGenerateFlashcards }) => {
+// Small custom CSS for the 3D flip effect.
+// In a larger project, you might move this to your main CSS file (e.g., index.css).
+const flashcardStyles = `
+  .flashcard-container {
+    perspective: 1000px; /* Defines the 3D space */
+  }
+
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.7s;
+    transform-style: preserve-3d; /* Ensures children are positioned in 3D space */
+  }
+
+  .flashcard-inner.is-flipped {
+    transform: rotateY(180deg);
+  }
+
+  .flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* Hides the back of the element when facing away */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  }
+
+  .flashcard-front {
+    background: linear-gradient(135deg, #e0f2f7, #bbdefb); /* Light blue gradient */
+    color: #333;
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 500; /* font-medium */
+  }
+
+  .flashcard-back {
+    background: linear-gradient(135deg, #c5e1a5, #aed581); /* Light green gradient */
+    color: #444;
+    font-size: 1.125rem; /* text-lg */
+    transform: rotateY(180deg); /* Initial rotation for the back face */
+  }
+`;
+
+
+const FlashcardsSection = ({ flashcards, loading, error, onGenerateFlashcards, isDocumentLoaded }) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -27,26 +76,32 @@ const FlashcardsSection = ({ flashcards, loading, error, onGenerateFlashcards })
   if (loading) {
     return (
       <div className="text-center py-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-        <p className="text-gray-600">Generating flashcards...</p>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="text-muted mt-2">Generating flashcards...</p>
       </div>
     );
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-600">Error: {error}</div>;
+    return <div className="alert alert-danger text-center py-3">Error: {error}</div>;
   }
 
   if (!flashcards || flashcards.length === 0) {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto text-center">
-        <p className="text-gray-500 mb-4">No flashcards generated yet. Upload a document and click the button below!</p>
+      <div className="card shadow-sm p-4 text-center">
+        <p className="text-muted mb-3">No flashcards generated yet. Upload a document and click the button below!</p>
         <button
           onClick={onGenerateFlashcards}
-          className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+          className="btn btn-primary"
+          disabled={!isDocumentLoaded} // Disable if no document is loaded
         >
           Generate Flashcards
         </button>
+        {!isDocumentLoaded && (
+          <small className="text-muted mt-2">Please upload or select a document first.</small>
+        )}
       </div>
     );
   }
@@ -54,53 +109,54 @@ const FlashcardsSection = ({ flashcards, loading, error, onGenerateFlashcards })
   const currentCard = flashcards[currentCardIndex];
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">Flashcards</h2>
+    <div className="card shadow-sm p-4">
+      {/* Inject custom styles */}
+      <style>{flashcardStyles}</style>
 
-      <div className="flex justify-center mb-6">
+      <h5 className="card-title text-dark mb-4 text-center">Flashcards</h5>
+
+      <div className="d-flex justify-content-center mb-4">
         <button
           onClick={onGenerateFlashcards}
-          className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+          className="btn btn-outline-primary"
+          disabled={!isDocumentLoaded} // Disable if no document is loaded
         >
           Regenerate Flashcards
         </button>
       </div>
 
-      <div className="relative w-full h-64 perspective-1000">
+      <div className="flashcard-container" style={{ width: '100%', height: '200px' }}> {/* Fixed height for consistency */}
         <div
-          className={`relative w-full h-full text-center flex items-center justify-center rounded-lg shadow-lg bg-gradient-to-br from-blue-100 to-blue-200 transition-transform duration-700 preserve-3d ${
-            isFlipped ? 'rotate-y-180' : ''
-          }`}
+          className={`flashcard-inner ${isFlipped ? 'is-flipped' : ''}`}
           onClick={handleFlipCard}
-          style={{ transformStyle: 'preserve-3d' }}
         >
           {/* Front of the card (Question) */}
-          <div className="absolute w-full h-full backface-hidden flex items-center justify-center p-4 text-xl font-medium text-gray-800">
+          <div className="flashcard-face flashcard-front">
             {currentCard.question}
           </div>
 
           {/* Back of the card (Answer) */}
-          <div className="absolute w-full h-full backface-hidden rotate-y-180 flex items-center justify-center p-4 text-lg text-gray-700">
+          <div className="flashcard-face flashcard-back">
             {currentCard.answer}
           </div>
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-6">
+      <div className="d-flex justify-content-between align-items-center mt-4">
         <button
           onClick={handlePrevCard}
           disabled={flashcards.length <= 1}
-          className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-200"
+          className="btn btn-secondary"
         >
           Previous
         </button>
-        <span className="text-lg font-medium text-gray-700">
+        <span className="fw-bold text-dark">
           {currentCardIndex + 1} / {flashcards.length}
         </span>
         <button
           onClick={handleNextCard}
           disabled={flashcards.length <= 1}
-          className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-200"
+          className="btn btn-secondary"
         >
           Next
         </button>

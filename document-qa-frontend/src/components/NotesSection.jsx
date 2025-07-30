@@ -153,25 +153,32 @@ const NotesSection = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-4 text-gray-600">Loading notes...</div>;
+    return (
+      <div className="text-center py-4">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="text-muted mt-2">Loading notes...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-600">Error: {error}</div>;
+    return <div className="alert alert-danger text-center py-3">Error: {error}</div>;
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Notes</h2>
+    <div className="card shadow-sm p-4">
+      <h5 className="card-title text-dark mb-4">Your Notes</h5>
       {userId && (
-        <p className="text-sm text-gray-500 mb-4">
-          Logged in as: <span className="font-mono text-blue-600 break-all">{userId}</span>
+        <p className="text-muted small mb-4">
+          Logged in as: <span className="fw-bold text-primary break-all">{userId}</span>
         </p>
       )}
 
-      <div className="mb-6">
+      <div className="mb-4">
         <textarea
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+          className="form-control mb-3"
           rows="4"
           placeholder="Write your notes here..."
           value={newNote}
@@ -179,8 +186,9 @@ const NotesSection = () => {
         ></textarea>
         <button
           onClick={handleAddNote}
-          className="mt-3 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+          className="btn btn-primary w-100"
           aria-label="Add note"
+          disabled={!isAuthReady || !db || !userId} // Disable if Firebase not ready
         >
           Add Note
         </button>
@@ -188,23 +196,23 @@ const NotesSection = () => {
 
       <div>
         {notes.length === 0 ? (
-          <p className="text-gray-500 text-center">No notes yet. Add one above!</p>
+          <p className="text-muted text-center">No notes yet. Add one above!</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="list-group list-group-flush">
             {notes.map((note) => (
               <li
                 key={note.id}
-                className="bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200 flex justify-between items-start"
+                className="list-group-item d-flex justify-content-between align-items-start"
               >
-                <div className="flex-grow">
-                  <p className="text-gray-800 text-base mb-1">{note.content}</p>
-                  <p className="text-xs text-gray-500">
+                <div className="flex-grow-1 me-3">
+                  <p className="mb-1 text-dark">{note.content}</p>
+                  <small className="text-muted">
                     {note.createdAt ? new Date(note.createdAt.toDate()).toLocaleString() : 'Saving...'}
-                  </p>
+                  </small>
                 </div>
                 <button
                   onClick={() => handleDeleteNote(note.id)}
-                  className="ml-4 p-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200"
+                  className="btn btn-sm btn-danger"
                   aria-label="Delete note"
                 >
                   Delete

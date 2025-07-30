@@ -1,85 +1,388 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Import Animate.css for subtle animations */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+/* Import a modern, tech-inspired font (e.g., 'Orbitron' or 'Rajdhani' from Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* --- Global Reset / Base Styles for AI Theme --- */
 body {
+  font-family: 'Rajdhani', sans-serif !important; /* Modern, clean font for all body text */
+  background-color: #1a202c; /* Dark background */
+  color: #e2e8f0; /* Light text */
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scroll from animations */
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Apply Orbitron to all headings globally */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Orbitron', sans-serif !important;
 }
 
-button {
+/* Ensure form controls and buttons also use Rajdhani */
+input, textarea, button, .form-control {
+  font-family: 'Rajdhani', sans-serif !important;
+}
+
+/* --- Landing Page Specific Styles --- */
+.landing-page {
+  background-color: #1a202c; /* Dark background */
+  color: #e2e8f0;
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: #1a202c; /* Fallback dark base color */
+  position: relative !important; /* Crucial for pseudo-element positioning */
+  padding: 100px 0; /* Keep padding for content spacing */
+  overflow: hidden !important; /* Force clip content outside this boundary */
+  border-bottom: 2px solid rgba(0, 123, 255, 0.2); /* Subtle border */
+  min-height: 400px; /* Ensure a minimum height for the section */
+  display: flex !important; /* Use flexbox for content centering */
+  flex-direction: column !important;
+  justify-content: center !important; /* Center content vertically */
+  align-items: center !important; /* Center content horizontally */
+
+  /* --- CRITICAL: BACKGROUND IMAGE PROPERTIES --- */
+  background-image: url('/images/ChatGPT Image Jul 26, 2025, 06_01_16 PM.png'); /* Your hero image path */
+  background-size: cover !important; /* Make image cover the entire section */
+  background-position: center center !important; /* Center the image */
+  background-repeat: no-repeat !important; /* Do not repeat the image */
+  background-attachment: scroll !important; /* Image scrolls with the page */
+}
+
+/* Pseudo-element for Hero Section Overlay (darkening effect) */
+.hero-section::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.6) !important; /* Dark overlay with 60% opacity */
+  z-index: 0 !important; /* Ensure overlay is between background image and content */
+}
+
+
+.hero-section .container {
+  position: relative;
+  z-index: 1 !important; /* Ensure text content is above the overlay */
+}
+
+.hero-section .display-3 {
+  font-family: 'Orbitron', sans-serif !important; /* Ensure Orbitron for this heading */
+  font-weight: 700;
+  font-size: 3.8rem;
+  text-shadow: 0 0 15px rgba(0, 123, 255, 0.7); /* Subtle glow */
+}
+
+.glowing-text {
+  animation: neon-glow 1.5s ease-in-out infinite alternate;
+}
+
+.glowing-text-secondary {
+  animation: neon-glow-secondary 2s ease-in-out infinite alternate;
+}
+
+@keyframes neon-glow {
+  from {
+    text-shadow: 0 0 5px #007bff, 0 0 10px #007bff, 0 0 15px #007bff, 0 0 20px #007bff;
+  }
+  to {
+    text-shadow: 0 0 10px #007bff, 0 0 20px #007bff, 0 0 30px #007bff, 0 0 40px #007bff, 0 0 50px #007bff;
+  }
+}
+
+@keyframes neon-glow-secondary {
+  from {
+    text-shadow: 0 0 3px #6f42c5, 0 0 6px #6f42c5;
+  }
+  to {
+    text-shadow: 0 0 6px #6f42c5, 0 0 12px #6f42c5, 0 0 18px #6f42c5;
+  }
+}
+
+
+.btn-primary-glow {
+  background-color: white !important; /* Force white background */
+  color: #1a202c !important; /* Force dark text */
+  border: 2px solid #007bff !important; /* Add a distinct blue border */
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3) !important; /* Subtle black shadow */
+  font-weight: bold !important; /* Ensure font weight is maintained */
+}
+
+.btn-primary-glow:hover {
+  background-color: #f0f0f0 !important; /* Slightly off-white on hover */
+  color: #1a202c !important; /* Ensure dark text on hover */
+  border-color: #00c7ff !important; /* Brighter blue border on hover */
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.5) !important; /* More prominent shadow on hover */
+  transform: translateY(-2px);
+}
+
+/* Features Section - (Confirmed by user as fixed, no major changes here) */
+.features-section {
+  background-color: #2d3748; /* Slightly lighter dark background */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-card {
+  background-color: #202733; /* Even darker card background */
+  border: 1px solid rgba(0, 123, 255, 0.1);
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.1);
+  color: #e2e8f0; /* Ensure text color on card is light */
+  /* Added flex properties to center content vertically */
+  display: flex !important; /* Force flexbox */
+  flex-direction: column !important;
+  align-items: center !important; /* Center items horizontally */
+  justify-content: flex-start !important; /* Align items to the top */
+  text-align: center !important; /* Center text */
+  padding: 1.5rem !important; /* Ensure consistent padding */
+  overflow: hidden !important; /* CRITICAL: Clip image if it tries to break out */
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.4), 0 0 40px rgba(111, 66, 197, 0.2);
+  border-color: #007bff;
+}
+
+.feature-card h3 {
+  font-family: 'Orbitron', sans-serif !important; /* Ensure Orbitron for feature headings */
+  color: #e2e8f0 !important; /* Ensure heading text is light */
+  margin-top: 0.5rem; /* Add some space above heading */
+}
+
+.feature-card p {
+  color: #a0aec0 !important; /* Ensure paragraph text is light muted */
+}
+
+/* Styling for feature images in LandingPage */
+.feature-img {
+  width: 100px !important; /* Force larger image */
+  height: 100px !important; /* Force larger image */
+  object-fit: contain !important; /* Force contain to show full image */
+  border-radius: 10px !important; /* Optional: subtle rounded corners for images */
+  padding: 5px !important; /* Optional: some padding if images are tight */
+  background-color: rgba(255, 255, 255, 0.05) !important; /* Subtle background for the image area */
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.2) !important; /* Subtle glow around the image */
+  margin: 0 auto 1rem auto !important; /* Center horizontally and add bottom margin */
+  display: block !important; /* Ensure it behaves as a block element for margin:auto */
+}
+
+
+/* Call to Action Section */
+.cta-section {
+  background-color: #1a202c; /* Fallback dark base color */
+  position: relative !important; /* Crucial for pseudo-element positioning */
+  padding: 100px 0;
+  overflow: hidden !important; /* CRITICAL: Clip content outside this boundary */
+  border-top: 2px solid rgba(0, 123, 255, 0.2);
+  min-height: 300px; /* Ensure a minimum height for the section */
+  display: flex !important; /* Use flexbox for content centering */
+  flex-direction: column !important;
+  justify-content: center !important; /* Center content vertically */
+  align-items: center !important; /* Center content horizontally */
+
+  /* --- CRITICAL: BACKGROUND IMAGE PROPERTIES --- */
+  background-image: url('/images/ChatGPT Image Jul 26, 2025, 06_01_16 PM.png'); /* Your CTA image path */
+  background-size: cover !important; /* Make image cover the entire section */
+  background-position: center center !important; /* Center the image */
+  background-repeat: no-repeat !important; /* Do not repeat the image */
+  background-attachment: scroll !important; /* Image scrolls with the page */
+}
+
+/* Pseudo-element for CTA Section Overlay (darkening effect) */
+.cta-section::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.6) !important; /* Dark overlay with 60% opacity */
+  z-index: 0 !important; /* Ensure overlay is between background image and content */
+}
+
+
+.cta-section .display-4 {
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+}
+
+/* Footer */
+.footer {
+  background-color: #111827 !important; /* Even darker footer */
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- General App Styles (Keep your existing custom styles here) --- */
+/* Ensure body and headings maintain consistent fonts in main app */
+body {
+  font-family: 'Rajdhani', sans-serif !important;
+}
+h1, h2, h3, h4, h5, h6, .custom-heading {
+  font-family: 'Orbitron', sans-serif !important;
+}
+
+.custom-card {
+  background-color: #2d3748; /* Darker card for main app */
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  width: 100%;
+  max-width: 900px; /* Adjust as needed */
+  margin: 20px auto;
+  color: #e2e8f0; /* Light text for main app */
+}
+
+.custom-heading {
+  color: #007bff; /* Primary blue for headings */
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.custom-section-card {
+  background-color: #202733; /* Darker section card */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 20px;
+  color: #e2e8f0; /* Light text */
+}
+
+.custom-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background-color 0.3s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.custom-button:hover {
+  background-color: #0056b3;
 }
 
-/* Custom CSS for Flashcard Flip */
-.perspective-1000 {
-  perspective: 1000px;
+.nav-link { /* Ensure Bootstrap's nav-link styles are not overridden negatively */
+  color: #007bff !important; /* Default tab color */
+  border-color: transparent !important;
+  transition: all 0.3s ease;
 }
 
-.preserve-3d {
-  transform-style: preserve-3d;
+.nav-link.active {
+  color: #00c7ff !important; /* Brighter active tab color */
+  border-color: #00c7ff !important;
+  font-weight: bold;
 }
 
-.backface-hidden {
-  backface-visibility: hidden;
+.nav-link:hover {
+  color: #00c7ff !important;
+  border-color: #007bff !important;
 }
 
-.rotate-y-180 {
-  transform: rotateY(180deg);
+/* Adjustments for Bootstrap alerts to fit dark theme */
+.alert-info {
+  background-color: #17a2b840; /* Transparent info blue */
+  color: #17a2b8;
+  border-color: #17a2b8;
+}
+.alert-success {
+  background-color: #28a74540;
+  color: #28a745;
+  border-color: #28a745;
+}
+.alert-danger {
+  background-color: #dc354540;
+  color: #dc3545;
+  border-color: #dc3545;
+}
+.alert-warning {
+  background-color: #ffc10740;
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+/* Spinner color adjustment */
+.spinner-border {
+  color: #007bff !important;
+}
+
+/* Ensure text colors are readable on dark backgrounds */
+.text-dark { color: #e2e8f0 !important; } /* Make 'text-dark' light on dark theme */
+.text-muted { color: #a0aec0 !important; } /* Lighter muted text */
+.text-primary { color: #007bff !important; }
+.text-secondary { color: #6c757d !important; } /* Keep secondary for subtle elements */
+
+/* Specific overrides for some Bootstrap elements to fit dark theme */
+.bg-light { background-color: #2d3748 !important; } /* Light background becomes a dark shade */
+.bg-dark { background-color: #1a202c !important; } /* Dark background remains very dark */
+.bg-dark-alt { background-color: #111827 !important; } /* Even darker for footer */
+
+/* Form control adjustments */
+.form-control {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  color: #e2e8f0;
+}
+.form-control::placeholder {
+  color: #a0aec0;
+}
+.form-control:focus {
+  background-color: #2d3748;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+  color: #e2e8f0;
+}
+
+/* Buttons for main app sections */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+.btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Flashcard specific adjustments from previous step */
+.flashcard-front {
+  background: linear-gradient(135deg, #007bff, #00c7ff); /* Bright blue gradient */
+  color: white;
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, #6f42c5, #a06cd5); /* Purple gradient */
+  color: white;
+}
+
+/* Ensure feather icons are visible */
+.feather {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
